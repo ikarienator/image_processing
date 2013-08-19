@@ -1,18 +1,18 @@
 var MAPPING_VERTEX_SHADER = "attribute vec3 aPosition;\n" +
-    "varying vec2 vTexCoord;\n" +
-    "uniform int width, height;\n" +
-    "void main() {\n" +
-    "  gl_Position = vec4((aPosition - 0.5) * 2.0, 1.0);\n" +
-    "  vTexCoord = aPosition.xy;\n" +
-    "}";
+  "varying vec2 vTexCoord;\n" +
+  "uniform int width, height;\n" +
+  "void main() {\n" +
+  "  gl_Position = vec4((aPosition - 0.5) * 2.0, 1.0);\n" +
+  "  vTexCoord = aPosition.xy;\n" +
+  "}";
 var MAPPING_FRAGMENT_SHADER = "#ifdef GL_ES\n" +
-    "precision highp float;\n" +
-    "#endif\n" +
-    "uniform sampler2D uTexture;\n" +
-    "varying vec2 vTexCoord;\n" +
-    "void main() {\n" +
-    "  gl_FragColor = texture2D(uTexture, vTexCoord);\n" +
-    "}";
+  "precision highp float;\n" +
+  "#endif\n" +
+  "uniform sampler2D uTexture;\n" +
+  "varying vec2 vTexCoord;\n" +
+  "void main() {\n" +
+  "  gl_FragColor = texture2D(uTexture, vTexCoord);\n" +
+  "}";
 
 function PostProcessor(canvas, width, height) {
   this.width = width;
@@ -129,11 +129,11 @@ PostProcessor.prototype.setupInputImage = function (image, width, height) {
   gl.viewport(0, 0, this.width, this.height);
   gl.bindTexture(gl.TEXTURE_2D, this.working_textures[0]);
   gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA,
-      this.width, this.height, 0, gl.RGBA,
-      gl.UNSIGNED_BYTE, null);
+    this.width, this.height, 0, gl.RGBA,
+    gl.UNSIGNED_BYTE, null);
   gl.bindTexture(gl.TEXTURE_2D, this.working_textures[1]);
   gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA,
-      gl.UNSIGNED_BYTE, image);
+    gl.UNSIGNED_BYTE, image);
 };
 
 PostProcessor.prototype.setupInput = function (array) {
@@ -141,12 +141,12 @@ PostProcessor.prototype.setupInput = function (array) {
   gl.viewport(0, 0, this.width, this.height);
   gl.bindTexture(gl.TEXTURE_2D, this.working_textures[0]);
   gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA,
-      this.width, this.height, 0, gl.RGBA,
-      gl.UNSIGNED_BYTE, null);
+    this.width, this.height, 0, gl.RGBA,
+    gl.UNSIGNED_BYTE, null);
   gl.bindTexture(gl.TEXTURE_2D, this.working_textures[1]);
   gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA,
-      this.width, this.height, 0, gl.RGBA,
-      gl.UNSIGNED_BYTE, new Uint8Array(array.buffer));
+    this.width, this.height, 0, gl.RGBA,
+    gl.UNSIGNED_BYTE, new Uint8Array(array.buffer));
 };
 
 PostProcessor.prototype.createInputImage = function (image, width, height) {
@@ -155,7 +155,7 @@ PostProcessor.prototype.createInputImage = function (image, width, height) {
   gl.viewport(0, 0, this.width, this.height);
   gl.bindTexture(gl.TEXTURE_2D, texture);
   gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA,
-      gl.UNSIGNED_BYTE, image);
+    gl.UNSIGNED_BYTE, image);
   return texture;
 };
 
@@ -165,18 +165,18 @@ PostProcessor.prototype.createInput = function (array) {
   gl.viewport(0, 0, this.width, this.height);
   gl.bindTexture(gl.TEXTURE_2D, this.working_textures[0]);
   gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA,
-      this.width, this.height, 0, gl.RGBA,
-      gl.UNSIGNED_BYTE, new Uint8Array(array.buffer));
+    this.width, this.height, 0, gl.RGBA,
+    gl.UNSIGNED_BYTE, new Uint8Array(array.buffer));
   return texture;
 };
 
 
-PostProcessor.prototype.callProgram = function (program, inputs, uniforms) {
+PostProcessor.prototype.callProgram = function (program, inputs, output, uniforms) {
   var gl = this.gl;
   // Output
   gl.viewport(0, 0, this.width, this.height);
   gl.bindFramebuffer(gl.FRAMEBUFFER, this.frameBuffer);
-  gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, this.working_textures[0], 0);
+  gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, output, 0);
 
   // Input
   for (var i = 0; i < inputs.length; i++) {
@@ -194,8 +194,12 @@ PostProcessor.prototype.callProgram = function (program, inputs, uniforms) {
 
 };
 
+PostProcessor.prototype.copyTo = function (output) {
+  this.callProgram(this.copyProgram, [this.working_textures[1]], output);
+}
+
 PostProcessor.prototype.iterate = function (program, uniforms) {
-  this.callProgram(program, [this.working_textures[1]], uniforms);
+  this.callProgram(program, [this.working_textures[1]], this.working_textures[0], uniforms);
   var temp = this.working_textures[1];
   this.working_textures[1] = this.working_textures[0];
   this.working_textures[0] = temp;

@@ -18,12 +18,15 @@ function init() {
   var gx = postproc.createProgram(loadShader('shaders/gaussian.x.fs.glsl'));
   var gy = postproc.createProgram(loadShader('shaders/gaussian.y.fs.glsl'));
   var sobel = postproc.createProgram(loadShader('shaders/sobel.fs.glsl'));
+  var copy = postproc.createProgram(loadShader('shaders/copy.fs.glsl'));
+  var origin = postproc.createInput(null, 1024, 1024);
 
   function tick() {
     srcCtx.drawImage(video, 0, 0);
     postproc.setupInputImage(srcCanvas);
+    postproc.copyTo(origin);
     postproc.iterate(sobel);
-    postproc.render(WIDTH, HEIGHT);
+    postproc.render();
 
     webkitRequestAnimationFrame(tick);
   }

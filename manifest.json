@@ -9,5 +9,6 @@
     "background": {
       "scripts": ["background.js"]
     }
-  }
+  },
+  "permissions": [ "videoCapture" ]
 }
